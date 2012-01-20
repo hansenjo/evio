@@ -187,13 +187,30 @@ static void swap_data(uint32_t *data, uint32_t type, uint32_t length,
   case 0xf:
     if(dest==NULL) d=data; else d=dest;                                        // in place or copy
 
-    swap_int32_t(data,1,d);                                                    // swap format tagsegment header word
+    if (tolocal) {
+        swap_int32_t(data,1,d);                                                // swap format tagsegment header word
+    }
+    
     formatLen=d[0]&0xffff;                                                     // get length of format string
+    
+    if (!tolocal) {
+        swap_int32_t(data,1,d);                                                // swap format tagsegment header word
+    }
+    
     if(dest!=NULL)copy_data(&(data[1]),formatLen,&(d[1]));                     // copy if needed
+    
     formatString=(char*)(&(d[1]));                                             // set start of format string
 
-    swap_int32_t(&(data[formatLen+1]),2,&(d[formatLen+1]));                    // swap data bank header words
+    if (tolocal) {
+        swap_int32_t(&(data[formatLen+1]),2,&(d[formatLen+1]));                // swap data bank header words
+    }
+    
     dataLen=d[formatLen+1];                                                    // get length of composite data
+    
+    if (!tolocal) {
+        swap_int32_t(&(data[formatLen+1]),2,&(d[formatLen+1]));                // swap data bank header words
+    }
+    
     if(dest!=NULL)copy_data(&(data[formatLen+3]),dataLen,&(d[formatLen+3]));   // copy if needed
     dswap=&(d[formatLen+3]);                                                   // get start of composite data
 
